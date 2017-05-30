@@ -6,6 +6,7 @@ import os
 # get the artifactory url from the environment
 ARTIFACTORY_URL = os.environ.get('ARTIFACTORY_URL',
                                  'http://localhost:8080/artifactory/api/')
+ARTIFACTORY_API_KEY = os.environ.get('ARTIFACTORY_API_KEY', '')
 
 
 class ApiError(Exception):
@@ -15,13 +16,17 @@ class ArtifactoryApi:
 
     def __init__(self, url = ARTIFACTORY_URL):
         self.url = url
+        self.api_key_header = None
 
-    def _get(self, path):
-        resp = requests.get(self.url + path)
+    def _get_from_url(self, full_url):
+        resp = requests.get(full_url, headers=self.api_key_header)
         if not resp.ok:
             # This means something went wrong.
-            raise ApiError('GET {} {}'.format(path, resp.status_code))
+            raise ApiError('GET {} {}'.format(full_url, resp.status_code))
         return resp.json()
+
+    def _get(self, path):
+        return self._get_from_url(self.url + path)
 
     def _post(self, path, payload):
         resp = requests.post(self.url + path, json = payload)
@@ -153,3 +158,53 @@ class ArtifactoryApi:
         path = 'gpg/key/private'
         self._put_file(path, filename, headers={'X-GPG-PASSPHRASE': phrase})
 
+    def get_link_to_last_modified(self, repo, path):
+        """ Searches for artifacts with the latest modification date.
+
+        Args:
+            repo (str): The repository name.
+            path (str): The full path to the file to be searched for.
+
+        Returns:
+            str: Download url to the artifact.
+        """
+        the_link = self._get('storage/'+repo+'/'+path+'/?lastModified')['uri']
+        return self._get_from_url(the_link)['downloadUri']
+
+    def get_link_to_last_version(self, repo, path):
+        """ Searches for artifacts with the latest value in the "version" property. Only artifacts
+        with a "version" property expressly defined in lower case will be taken into account. 
+
+        Args:
+            repo (str): The repository name.
+            path (str): The full path to the file to be searched for.
+
+        Returns:
+            str: Download url to the artifact.
+
+        Notes:
+            Requires an authenticated user (not anonymous).
+        """
+        the_link = self._get('versions/'+repo+'/'+path+'?listFiles=1')
+        return the_link['artifacts'][0]['downloadUri']
+
+    def download_file(self, url, path_to_file):
+        """ Download a file from the Artifactory server.
+
+        Args:
+            url (str): Url to the file to be downloaded.
+            path_to_file (str): Path + filename to be used for downloading the file.
+        """
+        r = requests.get(url, stream=True)
+        with open(path_to_file, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk:
+                    f.write(chunk)
+
+    def set_authentication_api_key(self, api_key=ARTIFACTORY_API_KEY):
+        """ Set the API Key for running commands needing authentication.
+
+        Args:
+            the_key (str): The users Artifactory API key.
+        """
+        self.api_key_header = {'X-JFrog-Art-Api':api_key}
