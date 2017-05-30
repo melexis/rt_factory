@@ -2,6 +2,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 import os
+import logging
 
 # get the artifactory url from the environment
 ARTIFACTORY_URL = os.environ.get('ARTIFACTORY_URL',
@@ -158,7 +159,7 @@ class ArtifactoryApi:
         path = 'gpg/key/private'
         self._put_file(path, filename, headers={'X-GPG-PASSPHRASE': phrase})
 
-    def get_link_to_last_modified(self, repo, path):
+    def get_link_to_last_modified(self, repository, path):
         """ Searches for artifacts with the latest modification date.
 
         Args:
@@ -168,15 +169,16 @@ class ArtifactoryApi:
         Returns:
             str: Download url to the artifact.
         """
-        the_link = self._get('storage/'+repo+'/'+path+'/?lastModified')['uri']
-        return self._get_from_url(the_link)['downloadUri']
+        path = 'storage/{repo}/{path}/?lastModified'.format(repo=repository, path=path)
+        temp_link = self._get(path)['uri']
+        return self._get_from_url(temp_link)['downloadUri']
 
-    def get_link_to_last_version(self, repo, path):
+    def get_link_to_last_version(self, repository, path):
         """ Searches for artifacts with the latest value in the "version" property. Only artifacts
         with a "version" property expressly defined in lower case will be taken into account. 
 
         Args:
-            repo (str): The repository name.
+            repository (str): The repository name.
             path (str): The full path to the file to be searched for.
 
         Returns:
@@ -185,8 +187,9 @@ class ArtifactoryApi:
         Notes:
             Requires an authenticated user (not anonymous).
         """
-        the_link = self._get('versions/'+repo+'/'+path+'?listFiles=1')
-        return the_link['artifacts'][0]['downloadUri']
+        path = 'versions/{repo}/{path}?listFiles=1'.format(repo=repository, path=path)
+        temp_link = self._get(path)
+        return temp_link['artifacts'][0]['downloadUri']
 
     def download_file(self, url, path_to_file):
         """ Download a file from the Artifactory server.
@@ -195,11 +198,11 @@ class ArtifactoryApi:
             url (str): Url to the file to be downloaded.
             path_to_file (str): Path + filename to be used for downloading the file.
         """
-        r = requests.get(url, stream=True)
-        with open(path_to_file, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024): 
+        dl_content = requests.get(url, stream=True)
+        with open(path_to_file, 'wb') as output_file:
+            for chunk in dl_content.iter_content(chunk_size=1024): 
                 if chunk:
-                    f.write(chunk)
+                    output_file.write(chunk)
 
     def set_authentication_api_key(self, api_key=ARTIFACTORY_API_KEY):
         """ Set the API Key for running commands needing authentication.
