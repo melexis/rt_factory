@@ -2,6 +2,10 @@
 import requests
 from requests.auth import HTTPBasicAuth
 import os
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
 import logging
 
 # get the artifactory url from the environment
@@ -30,14 +34,14 @@ class ArtifactoryApi:
         return self._get_from_url(self.url + path)
 
     def _post(self, path, payload):
-        resp = requests.post(self.url + path, json = payload)
+        resp = requests.post(self.url + path, json = payload, headers=self.api_key_header)
         if not resp.ok:
             # This means something went wrong.
             raise ApiError('POST {} {} {}'.format(path, resp.status_code, resp.content))
         return resp
 
-    def _put(self, path, payload):
-        resp = requests.put(self.url + path, json = payload)
+    def _put(self, path, payload=None):
+        resp = requests.put(self.url + path, json = payload, headers=self.api_key_header)
         if not resp.ok:
             # This means something went wrong.
             raise ApiError('PUT {} {} {}'.format(path, resp.status_code, resp.content))
@@ -211,3 +215,15 @@ class ArtifactoryApi:
             the_key (str): The users Artifactory API key.
         """
         self.api_key_header = {'X-JFrog-Art-Api':api_key}
+
+    def add_properties(self, repository, path, properties):
+        """ Set properties of an artifact
+
+        Args:
+            repository (str): The repository name.
+            path (str): The full path to the file to be searched for.
+            properties (list): Json list of properties to set on the artifact.
+        """
+        prop = urlencode(properties).replace('&', '|')
+        path = 'storage/{repo}/{path}?properties={prop}&recursive=1'.format(repo=repository, path=path, prop=prop)
+        self._put(path, properties)
