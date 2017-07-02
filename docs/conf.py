@@ -193,15 +193,41 @@ htmlhelp_basename = 'rt_factorydoc'
 
 # -- Options for LaTeX output ------------------------------------------
 
+latex_engine = 'lualatex'
+
+latex_additional_files = ['sphinxmanual.cls']
+
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    'papersize': 'a4paper',
 
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # 'pointsize': '10pt',
+    'passoptionstopackages': '%% passoptionstopackages',
+    'inputenc': '',
+    'cmappkg': '',
+    'fontenc': '',
+    'utf8extra': '',
+    'babel': '',
+    'fontpkg': '',
+    'fncychap': '',
+    'amsmath': '',
+    'hyperref': '',
+    'geometry': '',
 
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    'preamble': '''
+\\usepackage{mlxcommon}
+\\mlxpackages
+\\mlxformatting
+''',
+
+
+}
+
+latex_docclass = {
+    'howto': 'mlx-article',
+    'manual': 'mlx-report',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -209,7 +235,7 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'rt_factory.tex',
-     u'rt_factory Documentation',
+     u'rt\\_factory Documentation',
      u'Peter Tillemans', 'manual'),
 ]
 

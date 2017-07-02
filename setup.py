@@ -53,6 +53,8 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Topic :: System :: Archiving :: Packaging',
+        'Topic :: System :: Software Distribution',
     ],
     test_suite='tests',
     tests_require=test_requirements
