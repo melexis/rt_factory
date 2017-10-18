@@ -8,13 +8,15 @@ MISSION_CONTROL_PASS = os.getenv("MISSION_CONTROL_PASS", "password1")
 
 OPERATION_TYPES = ["CREATE_REPOSITORY", "UPDATE_REPOSITORY", "UPDATE_INSTANCE"]
 
+
 class MissionControlApi(AbstractApi):
 
     def __init__(self, url=MISSION_CONTROL_URL, user=MISSION_CONTROL_USER, pwd=MISSION_CONTROL_PASS):
         super().__init__(url=url, user=user, pwd=pwd)
 
-    # script resources
-
+    #
+    #  script resources
+    #
 
     def get_script_list(self):
         return self._get("scripts")
@@ -26,8 +28,142 @@ class MissionControlApi(AbstractApi):
         data = {"scriptMappings": script_mappings, "operationType": op_type}
         return self._post("scripts/user_inputs", data).json()
 
-
-    # instance resources
+    #
+    #  instance resources
+    #
 
     def get_instances(self):
         return self._get("instances")
+
+    def add_instance(self, name="", description="", url="", username="", password="",location=""):
+        data = {
+            "name": name,
+            "description": description,
+            "url": url,
+            "username": username,
+            "password": password,
+            "location": location,
+        }
+        return self._post("instances", data)
+
+    def update_instance(self, name="", description="", url="", username="", password="",location=""):
+        data = {
+            "description": description,
+            "url": url,
+            "username": username,
+            "password": password,
+            "location": location,
+        }
+        return self.put("instances/{}".format(name), data)
+
+    def delete_instance(self, name=""):
+        return self._delete("instances/{}".format(name))
+
+    def execute_scripts(self, instance_name="", script_names=[]):
+        data = {
+            "scriptMappings": [{
+                "instanceName": instance_name,
+                "scriptNames": script_names,
+            }]
+        }
+        return self._put("execute_scripts/instances", data)
+
+    def get_all_instances_status(self):
+        return self._get("instances/monitoring/status")
+
+    def get_instance_status(self, instance_name=""):
+        return self._get("instances/{}/monitoring/status".format(instance_name))
+
+    #
+    # repositories resource
+    #
+    def get_repositories(self, instance_name=""):
+        return self._get("instances/{}/repositories".format(instance_name))
+
+    def create_repository(self, instance_name="", script_names=[], script_user_inputs = {}):
+        data = {
+            "scriptMappings": [{
+                "instanceName": instance_name,
+                "scriptNames": script_names,
+                "scriptUserInputs": script_user_inputs,
+            }],
+        }
+        return self._post("execute_scripts/repositories", data)
+
+    def update_repository(self, instance_name="", repository_key=""
+                          , script_names=[], script_user_inputs={}):
+        data = {
+            "scriptMappings": [{
+                "instanceName": instance_name,
+                "repositoryKey": repository_key,
+                "scriptNames": script_names,
+                "scriptUserInputs": script_user_inputs,
+            }],
+        }
+        return self._put("execute_scripts/repositories", data)
+
+    #
+    # security resource
+    #
+
+    def create_user(self, instance_names=[], name="", email="", password=""
+                    , is_admin=False,
+                    , is_profile_updatable=False
+                    , is_internal_password_disabled=False):
+        data = {
+            "instanceNames": instance_names,
+            "user": {
+                "name": name,
+                "email": email,
+                "password": password,
+                "admin": is_admin,
+                "profileUpdatable": is_profile_updatable,
+                "internalPasswordDisabled": is_internal_password_disabled,
+            }
+        }
+        return self._post("security/users", data)
+
+    def update_user(self, instance_names=[], name="", email="", password=""
+                    , is_admin=False,
+                    , is_profile_updatable=False
+                    , is_internal_password_disabled=False):
+        data = {
+            "instanceNames": instance_names,
+            "user": {
+                "email": email,
+                "password": password,
+                "admin": is_admin,
+                "profileUpdatable": is_profile_updatable,
+                "internalPasswordDisabled": is_internal_password_disabled,
+            }
+        }
+        return self._post("security/users/{}".format(name), data)
+
+
+    def create_user_group(self, instance_names=[],
+                          name="", description="", auto_join=False,
+                          users=[]):
+        data = {
+            "instanceNames": instance_names,
+            "userGroup": {
+                "name": name,
+                "description": description,
+                "autoJoin": auto_join,
+                "users": users,
+            }
+        }
+        return self._post("security/user_groups", data)
+
+    def update_user_group(self, instance_names=[],
+                          name="", description="", auto_join=False,
+                          users=[]):
+        data = {
+            "instanceNames": instance_names,
+            "userGroup": {
+                "description": description,
+                "autoJoin": auto_join,
+                "users": users,
+            }
+        }
+        return self._post("security/user_groups/{}".format(name), data)
+
