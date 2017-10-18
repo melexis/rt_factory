@@ -47,8 +47,8 @@ class AbstractApi:
                 raise ApiError('PUT {} {} {}'.format(path, resp.status_code, resp.content))
         return resp
 
-    def _delete(self, path):
-        resp = requests.delete(self.url + path, headers=self.api_key_header, auth=self.auth)
+    def _delete(self, path, payload):
+        resp = requests.delete(self.url + path, json=payload, headers=self.api_key_header, auth=self.auth)
         if not resp.ok:
             # This means something went wrong.
             raise ApiError('DELETE {} {} {}'.format(path, resp.status_code, resp.content))

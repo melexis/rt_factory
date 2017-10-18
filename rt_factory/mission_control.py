@@ -107,7 +107,7 @@ class MissionControlApi(AbstractApi):
     #
 
     def create_user(self, instance_names=[], name="", email="", password=""
-                    , is_admin=False,
+                    , is_admin=False
                     , is_profile_updatable=False
                     , is_internal_password_disabled=False):
         data = {
@@ -124,7 +124,7 @@ class MissionControlApi(AbstractApi):
         return self._post("security/users", data)
 
     def update_user(self, instance_names=[], name="", email="", password=""
-                    , is_admin=False,
+                    , is_admin=False
                     , is_profile_updatable=False
                     , is_internal_password_disabled=False):
         data = {
@@ -167,3 +167,76 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("security/user_groups/{}".format(name), data)
 
+    def create_permission_target(self, instance_names=[],
+                                 name="", repositories=[],
+                                 any_remote=False, any_local=False,
+                                 excludes_pattern="", includes_pattern="",
+                                 users={}, groups={}):
+        data = {
+            "instanceNames" : instance_names,
+            "permissionTarget" : {
+                "name" : name,
+                "repositories" : repositories,
+                "anyRemote" : any_remote,
+                "anyLocal" : any_local,
+                "excludesPattern": excludes_pattern,
+                "includesPattern" : includes_pattern,
+                "principals": {
+                    "users" : users,
+                    "groups" : groups,
+                }
+            }
+        }
+        return self._post("security/permission_targets")
+
+    def update_permission_target(self, instance_names=[],
+                                 name="", repositories=[],
+                                 any_remote=False, any_local=False,
+                                 excludes_pattern="", includes_pattern="",
+                                 users={}, groups={}):
+        data = {
+            "instanceNames" : instance_names,
+            "permissionTarget" : {
+                "repositories" : repositories,
+                "anyRemote" : any_remote,
+                "anyLocal" : any_local,
+                "excludesPattern": excludes_pattern,
+                "includesPattern" : includes_pattern,
+                "principals": {
+                    "users" : users,
+                    "groups" : groups,
+                }
+            }
+        }
+        return self._put("security/permission_targets/{}".format(name))
+
+    #
+    # license bucket resource
+    #
+
+    def get_bucket_status(self, bucket_name=""):
+        return self._get("buckets/{}/report".format(bucket_name))
+
+    def attach_license(self, bucket_name="", instance_name="", deploy=True, number_of_licenses=1):
+        data = {
+            "instanceName" : instance_name,
+            "deploy" : deploy,
+            "numberOfLicenses" : number_of_licenses,
+        }
+        return self._post("attach_lic/buckets/{}".format(bucket_name), data)
+
+    def detach_license(self, bucket_name="", instance_name=""):
+        data = {
+            "instanceName": instance_name
+        }
+        return self._delete("attach_/lic/buckets/{}".format(bucket_name), data)
+
+    #
+    # disaster recovery resource
+    #
+    def create_dr_pair(self, master="", target=""):
+        data = {
+            "source": master,
+            "target": target,
+        }
+        return self._post("dr-configs",data)
