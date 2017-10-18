@@ -4,7 +4,7 @@ import os
 
 MISSION_CONTROL_URL = os.getenv("MISSION_CONTROL_URL", "http://localhost:8080/missioncontrol/api/v2")
 MISSION_CONTROL_USER = os.getenv("MISSION_CONTROL_USER", "admin")
-MISSION_CONTROL_PASS = os.getenv("MISSION_CONTROL_PASS", "password1")
+MISSION_CONTROL_PASS = os.getenv("MISSION_CONTROL_PASS", "password")
 
 OPERATION_TYPES = ["CREATE_REPOSITORY", "UPDATE_REPOSITORY", "UPDATE_INSTANCE"]
 
