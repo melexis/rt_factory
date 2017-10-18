@@ -30,6 +30,28 @@ Features
 
 * TODO
 
+Installation
+------------
+
+on OSX you need to have the openssl headers and libraries installed and added to
+the include and library search paths in order to compile the *cryptography*
+package.
+
+.. code:: sh
+  ~/P/rt_factory ❯❯❯ brew install openssl                                                                                                                     ⏎master ✚ ✱
+  ~/P/rt_factory ❯❯❯ export LDFLAGS="-L/usr/local/opt/openssl/lib"                                                                                                                     ⏎master ✚ ✱
+  ~/P/rt_factory ❯❯❯ export CPPFLAGS="-I/usr/local/opt/openssl/include"                                                                                                                 master ✚ ✱
+  ~/P/rt_factory ❯❯❯ export PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig"                                                                                                      master ✚ ✱
+
+For linux you need to install *libssl-dev* on debian based systems or *openssl-devel*
+on RPM based systems.
+
+Once these dependencies are installed, just pip install the dev requirements.
+
+.. code:: sh
+  ~/P/rt_factory ❯❯❯ pip install -r requirements_dev.txt
+
+
 Credits
 ---------
 

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-import requests
-from requests.auth import HTTPBasicAuth
 import os
+
+import requests
+
+from rt_factory.support import AbstractApi
+
 try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
-import logging
 
 # get the artifactory url from the environment
 ARTIFACTORY_URL = os.environ.get('ARTIFACTORY_URL',
@@ -14,46 +16,10 @@ ARTIFACTORY_URL = os.environ.get('ARTIFACTORY_URL',
 ARTIFACTORY_API_KEY = os.environ.get('ARTIFACTORY_API_KEY', '')
 
 
-class ApiError(Exception):
-    pass
+class ArtifactoryApi(AbstractApi):
 
-class ArtifactoryApi:
-
-    def __init__(self, url = ARTIFACTORY_URL):
-        self.url = url
-        self.api_key_header = None
-
-    def _get_from_url(self, full_url):
-        resp = requests.get(full_url, headers=self.api_key_header)
-        if not resp.ok:
-            # This means something went wrong.
-            raise ApiError('GET {} {}'.format(full_url, resp.status_code))
-        return resp.json()
-
-    def _get(self, path):
-        return self._get_from_url(self.url + path)
-
-    def _post(self, path, payload):
-        resp = requests.post(self.url + path, json = payload, headers=self.api_key_header)
-        if not resp.ok:
-            # This means something went wrong.
-            raise ApiError('POST {} {} {}'.format(path, resp.status_code, resp.content))
-        return resp
-
-    def _put(self, path, payload=None):
-        resp = requests.put(self.url + path, json = payload, headers=self.api_key_header)
-        if not resp.ok:
-            # This means something went wrong.
-            raise ApiError('PUT {} {} {}'.format(path, resp.status_code, resp.content))
-        return resp
-
-    def _put_file(self, path, filename, **kwargs):
-        with open(filename, "rb") as file:
-            resp = requests.put(self.url + path, data = file, **kwargs)
-            if not resp.ok:
-                # This means something went wrong.
-                raise ApiError('PUT {} {} {}'.format(path, resp.status_code, resp.content))
-        return resp
+    def __init__(self, url=ARTIFACTORY_URL):
+        super().__init__(url=url)
 
     def get_repository(self, name):
         return self._get(name).json()
@@ -179,7 +145,7 @@ class ArtifactoryApi:
 
     def get_link_to_last_version(self, repository, path):
         """ Searches for artifacts with the latest value in the "version" property. Only artifacts
-        with a "version" property expressly defined in lower case will be taken into account. 
+        with a "version" property expressly defined in lower case will be taken into account.
 
         Args:
             repository (str): The repository name.
@@ -204,7 +170,7 @@ class ArtifactoryApi:
         """
         dl_content = requests.get(url, stream=True)
         with open(path_to_file, 'wb') as output_file:
-            for chunk in dl_content.iter_content(chunk_size=1024): 
+            for chunk in dl_content.iter_content(chunk_size=1024):
                 if chunk:
                     output_file.write(chunk)
 
