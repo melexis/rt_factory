@@ -11,7 +11,6 @@ class AbstractApi:
     def __init__(self, url="", user=None, pwd=None):
         self.url = url
         self.api_key_header = None
-        print(f"credentials=${user}:${pwd}")
         self.auth=HTTPBasicAuth(user, pwd)
 
     def _get_from_url(self, full_url):
