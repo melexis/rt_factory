@@ -14,7 +14,7 @@ class AbstractApi:
         self.auth=HTTPBasicAuth(user, pwd)
 
     def _get_from_url(self, full_url):
-        requests.get(full_url, headers=self.api_key_header, auth=self.auth)
+        resp = requests.get(full_url, headers=self.api_key_header, auth=self.auth)
         if not resp.ok:
             # This means something went wrong.
             raise ApiError('GET {} {}'.format(full_url, resp.status_code))
