@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from rt_factory.support import AbstractApi, ApiError
+from artifactory.support import AbstractApi, ApiError
 import os
 
 MISSION_CONTROL_URL = os.getenv("MISSION_CONTROL_URL", "http://localhost:8080/missioncontrol/api/v2")

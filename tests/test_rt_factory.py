@@ -14,12 +14,12 @@ import unittest
 from contextlib import contextmanager
 from click.testing import CliRunner
 
-from rt_factory import rt_factory
+from rt_factory import artifactory
 from rt_factory import cli
 
 
 
-class TestRt_factory(unittest.TestCase):
+class TestRtFactory(unittest.TestCase):
 
     def setUp(self):
         pass

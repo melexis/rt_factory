@@ -7,7 +7,7 @@ class ApiError(Exception):
     pass
 
 
-class AbstractApi:
+class AbstractApi(object):
     def __init__(self, url="", user=None, pwd=None):
         self.url = url
         self.api_key_header = None

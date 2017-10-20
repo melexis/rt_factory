@@ -29,8 +29,7 @@ setup(
     packages=[
         'rt_factory',
     ],
-    package_dir={'rt_factory':
-                 'rt_factory'},
+    package_dir={'rt_factory': 'rt_factory'},
     entry_points={
         'console_scripts': [
             'rt_factory=rt_factory.cli:main'
