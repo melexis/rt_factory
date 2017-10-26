@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import requests
-from support import AbstractApi, ApiError
+from .support import AbstractApi, ApiError
 
 try:
     from urllib import urlencode

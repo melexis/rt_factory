@@ -20,7 +20,7 @@ test_requirements = [
 
 setup(
     name='rt_factory',
-    version='0.1.0',
+    version='0.2.0',
     description="Pythonic wrapper for the artifactory API",
     long_description=readme + '\n\n' + history,
     author="Peter Tillemans",
