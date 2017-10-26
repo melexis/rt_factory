@@ -10,7 +10,6 @@ OPERATION_TYPES = ["CREATE_REPOSITORY", "UPDATE_REPOSITORY", "UPDATE_INSTANCE"]
 
 
 class MissionControlApi(AbstractApi):
-
     def __init__(self, url=MISSION_CONTROL_URL, user=MISSION_CONTROL_USER, pwd=MISSION_CONTROL_PASS):
         super(MissionControlApi, self).__init__(url=url, user=user, pwd=pwd)
 
@@ -21,7 +20,9 @@ class MissionControlApi(AbstractApi):
     def get_script_list(self):
         return self._get("scripts")
 
-    def list_user_inputs(self, script_mappings=[], op_type="*invalid*" ):
+    def list_user_inputs(self, script_mappings=None, op_type="*invalid*"):
+        if script_mappings is None:
+            script_mappings = []
         if op_type not in OPERATION_TYPES:
             raise ApiError("Invalid operation type passed to list_user_input : {}".format(op_type))
 
@@ -35,7 +36,7 @@ class MissionControlApi(AbstractApi):
     def get_instances(self):
         return self._get("instances")
 
-    def add_instance(self, name="", description="", url="", username="", password="",location=""):
+    def add_instance(self, name="", description="", url="", username="", password="", location=""):
         data = {
             "name": name,
             "description": description,
@@ -46,7 +47,7 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("instances", data)
 
-    def update_instance(self, name="", description="", url="", username="", password="",location=""):
+    def update_instance(self, name="", description="", url="", username="", password="", location=""):
         data = {
             "description": description,
             "url": url,
@@ -54,12 +55,14 @@ class MissionControlApi(AbstractApi):
             "password": password,
             "location": location,
         }
-        return self.put("instances/{}".format(name), data)
+        return self._put("instances/{}".format(name), data)
 
     def delete_instance(self, name=""):
-        return self._delete("instances/{}".format(name))
+        return self._delete("instances/{}".format(name), payload=None)
 
-    def execute_scripts(self, instance_name="", script_names=[]):
+    def execute_scripts(self, instance_name="", script_names=None):
+        if script_names is None:
+            script_names = []
         data = {
             "scriptMappings": [{
                 "instanceName": instance_name,
@@ -80,7 +83,12 @@ class MissionControlApi(AbstractApi):
     def get_repositories(self, instance_name=""):
         return self._get("instances/{}/repositories".format(instance_name))
 
-    def create_repository(self, instance_name="", script_names=[], script_user_inputs = {}):
+    def create_repository(self, instance_name="", script_names=None, script_user_inputs=None):
+        if script_names is None:
+            script_names = []
+        if script_user_inputs is None:
+            script_user_inputs = {}
+
         data = {
             "scriptMappings": [{
                 "instanceName": instance_name,
@@ -90,8 +98,12 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("execute_scripts/repositories", data)
 
-    def update_repository(self, instance_name="", repository_key=""
-                          , script_names=[], script_user_inputs={}):
+    def update_repository(self, instance_name="", repository_key="",
+                          script_names=None, script_user_inputs=None):
+        if script_user_inputs is None:
+            script_user_inputs = {}
+        if script_names is None:
+            script_names = []
         data = {
             "scriptMappings": [{
                 "instanceName": instance_name,
@@ -106,10 +118,12 @@ class MissionControlApi(AbstractApi):
     # security resource
     #
 
-    def create_user(self, instance_names=[], name="", email="", password=""
-                    , is_admin=False
-                    , is_profile_updatable=False
-                    , is_internal_password_disabled=False):
+    def create_user(self, instance_names=None, name="", email="", password="",
+                    is_admin=False,
+                    is_profile_updatable=False,
+                    is_internal_password_disabled=False):
+        if instance_names is None:
+            instance_names = []
         data = {
             "instanceNames": instance_names,
             "user": {
@@ -123,10 +137,12 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("security/users", data)
 
-    def update_user(self, instance_names=[], name="", email="", password=""
-                    , is_admin=False
-                    , is_profile_updatable=False
-                    , is_internal_password_disabled=False):
+    def update_user(self, instance_names=None, name="", email="", password="",
+                    is_admin=False,
+                    is_profile_updatable=False,
+                    is_internal_password_disabled=False):
+        if instance_names is None:
+            instance_names = []
         data = {
             "instanceNames": instance_names,
             "user": {
@@ -139,10 +155,13 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("security/users/{}".format(name), data)
 
-
-    def create_user_group(self, instance_names=[],
+    def create_user_group(self, instance_names=None,
                           name="", description="", auto_join=False,
-                          users=[]):
+                          users=None):
+        if instance_names is None:
+            instance_names = []
+        if users is None:
+            users = []
         data = {
             "instanceNames": instance_names,
             "userGroup": {
@@ -154,9 +173,13 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("security/user_groups", data)
 
-    def update_user_group(self, instance_names=[],
+    def update_user_group(self, instance_names=None,
                           name="", description="", auto_join=False,
-                          users=[]):
+                          users=None):
+        if users is None:
+            users = []
+        if instance_names is None:
+            instance_names = []
         data = {
             "instanceNames": instance_names,
             "userGroup": {
@@ -167,48 +190,64 @@ class MissionControlApi(AbstractApi):
         }
         return self._post("security/user_groups/{}".format(name), data)
 
-    def create_permission_target(self, instance_names=[],
-                                 name="", repositories=[],
+    def create_permission_target(self, instance_names=None,
+                                 name="", repositories=None,
                                  any_remote=False, any_local=False,
                                  excludes_pattern="", includes_pattern="",
-                                 users={}, groups={}):
+                                 users=None, groups=None):
+        if groups is None:
+            groups = {}
+        if users is None:
+            users = {}
+        if repositories is None:
+            repositories = []
+        if instance_names is None:
+            instance_names = []
         data = {
-            "instanceNames" : instance_names,
-            "permissionTarget" : {
-                "name" : name,
-                "repositories" : repositories,
-                "anyRemote" : any_remote,
-                "anyLocal" : any_local,
+            "instanceNames": instance_names,
+            "permissionTarget": {
+                "name": name,
+                "repositories": repositories,
+                "anyRemote": any_remote,
+                "anyLocal": any_local,
                 "excludesPattern": excludes_pattern,
-                "includesPattern" : includes_pattern,
+                "includesPattern": includes_pattern,
                 "principals": {
-                    "users" : users,
-                    "groups" : groups,
+                    "users": users,
+                    "groups": groups,
                 }
             }
         }
-        return self._post("security/permission_targets")
+        return self._post("security/permission_targets", payload=data)
 
-    def update_permission_target(self, instance_names=[],
-                                 name="", repositories=[],
+    def update_permission_target(self, instance_names=None,
+                                 name="", repositories=None,
                                  any_remote=False, any_local=False,
                                  excludes_pattern="", includes_pattern="",
-                                 users={}, groups={}):
+                                 users=None, groups=None):
+        if repositories is None:
+            repositories = []
+        if users is None:
+            users = {}
+        if groups is None:
+            groups = {}
+        if instance_names is None:
+            instance_names = []
         data = {
-            "instanceNames" : instance_names,
-            "permissionTarget" : {
-                "repositories" : repositories,
-                "anyRemote" : any_remote,
-                "anyLocal" : any_local,
+            "instanceNames": instance_names,
+            "permissionTarget": {
+                "repositories": repositories,
+                "anyRemote": any_remote,
+                "anyLocal": any_local,
                 "excludesPattern": excludes_pattern,
-                "includesPattern" : includes_pattern,
+                "includesPattern": includes_pattern,
                 "principals": {
-                    "users" : users,
-                    "groups" : groups,
+                    "users": users,
+                    "groups": groups,
                 }
             }
         }
-        return self._put("security/permission_targets/{}".format(name))
+        return self._put("security/permission_targets/{}".format(name), payload=data)
 
     #
     # license bucket resource
@@ -219,9 +258,9 @@ class MissionControlApi(AbstractApi):
 
     def attach_license(self, bucket_name="", instance_name="", deploy=True, number_of_licenses=1):
         data = {
-            "instanceName" : instance_name,
-            "deploy" : deploy,
-            "numberOfLicenses" : number_of_licenses,
+            "instanceName": instance_name,
+            "deploy": deploy,
+            "numberOfLicenses": number_of_licenses,
         }
         return self._post("attach_lic/buckets/{}".format(bucket_name), data)
 
@@ -239,4 +278,4 @@ class MissionControlApi(AbstractApi):
             "source": master,
             "target": target,
         }
-        return self._post("dr-configs",data)
+        return self._post("dr-configs", data)
