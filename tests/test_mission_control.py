@@ -5,7 +5,10 @@ Integration tests for mission control package
 """
 
 from unittest import TestCase
-from unittest.mock import Mock, patch
+try:
+    from unittest.mock import Mock, patch
+except ImportError:
+    from mock import Mock, patch
 
 from rt_factory.mission_control import MissionControlApi, OPERATION_TYPES
 from rt_factory.support import ApiError

@@ -15,12 +15,13 @@ requirements = [
 ]
 
 test_requirements = [
+    'mock>=2.0.0',
     # TODO: put package test requirements here
 ]
 
 setup(
     name='rt_factory',
-    version='0.2.2',
+    version='0.2.3',
     description="Pythonic wrapper for the artifactory API",
     long_description=readme + '\n\n' + history,
     author="Peter Tillemans",
