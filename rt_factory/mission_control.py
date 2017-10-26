@@ -12,7 +12,7 @@ OPERATION_TYPES = ["CREATE_REPOSITORY", "UPDATE_REPOSITORY", "UPDATE_INSTANCE"]
 class MissionControlApi(AbstractApi):
 
     def __init__(self, url=MISSION_CONTROL_URL, user=MISSION_CONTROL_USER, pwd=MISSION_CONTROL_PASS):
-        super().__init__(url=url, user=user, pwd=pwd)
+        super(MissionControlApi, self).__init__(url=url, user=user, pwd=pwd)
 
     #
     #  script resources
