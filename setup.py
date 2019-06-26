@@ -21,7 +21,10 @@ test_requirements = [
 
 setup(
     name='rt_factory',
-    version='0.2.5',
+    use_scm_version = {
+        'write_to': 'rt_factory/__rt_factory_version__.py'
+    },
+    setup_requires=['setuptools_scm'],
     description="Pythonic wrapper for the artifactory API",
     long_description=readme + '\n\n' + history,
     author="Peter Tillemans",
@@ -40,7 +43,7 @@ setup(
     install_requires=requirements,
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='rt_factory',
+    keywords=['Artifactory','rt_factory','wrapper'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
