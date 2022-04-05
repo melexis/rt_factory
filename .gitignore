@@ -60,3 +60,6 @@ target/
 
 # pyenv python configuration file
 .python-version
+
+# automatically generated version
+rt_factory/__rt_factory_version__.py
